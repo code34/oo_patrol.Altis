@@ -22,7 +22,7 @@
 
 	CLASS("OO_PATROL")
 
-		PRIVATE VARIABLE("array","group");
+		PRIVATE VARIABLE("group","group");
 		PRIVATE VARIABLE("scalar","areasize");
 		PRIVATE VARIABLE("array","center");
 		PRIVATE VARIABLE("string","enemyside");
@@ -57,7 +57,7 @@
 
 		PUBLIC FUNCTION("array", "Move") {
 			private ["_position", "_group", "_wp"];
-			_position = _this select 0;
+			_position = _this;
 
 			_group = MEMBER("group", nil);
 			_group setBehaviour "AWARE";
