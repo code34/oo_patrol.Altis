@@ -7,6 +7,11 @@
 		_position = ["RandomPos", ""] call _patrol;
 		["Move", _position] call _patrol;
 
+		sleep 2;
+
+		_distance = ["Scan", ""] call _patrol;
+		hint format["%1", _distance];
+		
 	
 
 

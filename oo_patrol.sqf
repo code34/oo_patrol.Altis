@@ -25,7 +25,7 @@
 		PRIVATE VARIABLE("group","group");
 		PRIVATE VARIABLE("scalar","areasize");
 		PRIVATE VARIABLE("array","center");
-		PRIVATE VARIABLE("string","enemyside");
+		PRIVATE VARIABLE("array","enemyside");
 		PRIVATE VARIABLE("array","waypoint");
 
 
@@ -33,18 +33,19 @@
 			MEMBER("group", _this select 0);
 			MEMBER("areasize", _this select 1);
 			MEMBER("center", _this select 2);
-			if(side (leader MEMBER("group", nil)) == west) then { MEMBER("enemyside", east);};
-			if(side (leader MEMBER("group", nil)) == east) then { MEMBER("enemyside", west);};
-			if(side (leader MEMBER("group", nil)) == resistance) then { MEMBER("enemyside", west);};
+			if(side (leader MEMBER("group", nil)) == west) then { _side = [east]; MEMBER("enemyside", _side);};
+			if(side (leader MEMBER("group", nil)) == east) then { _side = [west]; MEMBER("enemyside", _side);};
+			if(side (leader MEMBER("group", nil)) == resistance) then { _side = [west]; MEMBER("enemyside", _side);};
 		};
 
 		PUBLIC FUNCTION("string", "Scan") {
-			private ["_cibles", "_enemyside", "_list", "_position"];
+			private ["_areasize", "_cibles", "_enemyside", "_list", "_position"];
 
+			_areasize = MEMBER("areasize", nil);
 			_position = MEMBER("center", nil);
 			_enemyside = MEMBER("enemyside", nil);
 
-			_list = _position nearEntities [["Man"], MEMBER("areasize", nil)];
+			_list = _position nearEntities [["Man"], _areasize];
 
 			if(count _list > 0) then {
 				_cibles = [];
@@ -57,6 +58,7 @@
 					sleep 0.1;
 				}foreach _list;
 			};
+			_cibles;
 		};
 
 		PUBLIC FUNCTION("array", "Move") {
@@ -67,14 +69,27 @@
 			_group setBehaviour "AWARE";
 			_group setCombatMode "RED";
 
-			_wp = _group addWaypoint [_position, 25];
-			_wp setWaypointPosition [_position, 25];
+			_wp = _group addWaypoint [_position, 0];
+			_wp setWaypointPosition [_position, 0];
 			_wp setWaypointType "DESTROY";
 			_wp setWaypointVisible true;
 			_wp setWaypointSpeed "LIMITED";
 			_group setCurrentWaypoint _wp;
 			MEMBER("waypoint", _wp);
 		};
+
+		PUBLIC FUNCTION("string", "GoalDistance") {
+			leader (MEMBER("group", nil)) distance waypointPosition(MEMBER("waypoint", nil));
+		};
+
+		PUBLIC FUNCTION("string", "CheckMovement") {
+			if(MEMBER("GoalDistance", "") > 25) then {
+				true;
+			} else {
+				false;
+			};
+		};
+
 
 		PUBLIC FUNCTION("string", "RandomPos") {
 			private ["_areasize", "_newx", "_newy", "_position"];
