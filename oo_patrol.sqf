@@ -55,6 +55,37 @@
 			};
 		};
 
+		PUBLIC FUNCTION("array", "Move") {
+			private ["_position", "_group", "_wp"];
+			_position = _this select 0;
+
+			_group = MEMBER("group", nil);
+			_group setBehaviour "AWARE";
+			_group setCombatMode "RED";
+
+			_wp = _group addWaypoint [_position, 25];
+			_wp setWaypointPosition [_position, 25];
+			_wp setWaypointType "DESTROY";
+			_wp setWaypointVisible true;
+			_wp setWaypointSpeed "LIMITED";
+			_group setCurrentWaypoint _wp;
+		};
+
+		PUBLIC FUNCTION("string", "RandomPos") {
+			private ["_areasize", "_newx", "_newy", "_position"];
+
+			_position = MEMBER("center", nil);
+			_areasize = MEMBER("areasize", nil);
+
+			if(random 1 > 0.5) then {
+				_newx = (_position select 0) + ((random _areasize) * -1 );
+				_newy = (_position select 1) + ((random _areasize) * -1 );
+			} else {
+				_newx = (_position select 0) + (random _areasize);
+				_newy = (_position select 1) + (random _areasize);
+			};
+			[_newx, _newy];
+		};
 
 		PUBLIC FUNCTION("","deconstructor") { 
 			DELETE_VARIABLE("group");
