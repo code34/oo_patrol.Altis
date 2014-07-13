@@ -26,6 +26,7 @@
 		PRIVATE VARIABLE("scalar","areasize");
 		PRIVATE VARIABLE("array","center");
 		PRIVATE VARIABLE("string","enemyside");
+		PRIVATE VARIABLE("array","waypoint");
 
 
 		PUBLIC FUNCTION("array","constructor") {
@@ -38,10 +39,13 @@
 		};
 
 		PUBLIC FUNCTION("string", "Scan") {
-			private ["_position", "_list", "_cibles"];
+			private ["_cibles", "_enemyside", "_list", "_position"];
 
-			_position = position (leader MEMBER("group", nil));
+			_position = MEMBER("center", nil);
+			_enemyside = MEMBER("enemyside", nil);
+
 			_list = _position nearEntities [["Man"], MEMBER("areasize", nil)];
+
 			if(count _list > 0) then {
 				_cibles = [];
 				{
@@ -69,6 +73,7 @@
 			_wp setWaypointVisible true;
 			_wp setWaypointSpeed "LIMITED";
 			_group setCurrentWaypoint _wp;
+			MEMBER("waypoint", _wp);
 		};
 
 		PUBLIC FUNCTION("string", "RandomPos") {
@@ -91,7 +96,7 @@
 			DELETE_VARIABLE("group");
 			DELETE_VARIABLE("areasize");
 			DELETE_VARIABLE("center");
-			DELETE_VARIABLE("marker");
 			DELETE_VARIABLE("enemyside");
+			DELETE_VARIABLE("waypoint");
 		};
 	ENDCLASS;
