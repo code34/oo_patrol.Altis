@@ -60,7 +60,8 @@
 					};
 					sleep 0.1;
 				}foreach _list;
-			};			
+			};
+			_cibles;
 		};
 
 		PUBLIC FUNCTION("array", "SeeTarget") {
@@ -97,10 +98,11 @@
 		};
 
 		PUBLIC FUNCTION("string", "CheckMovement") {
-			private ["_oldposition", "_newposition"];
-			_oldposition = position (leader (MEMBER("group", nil)));
+			private ["_leader", "_oldposition", "_newposition"];
+			_leader = leader (MEMBER("group", nil));
+			_oldposition = position _leader;
 			sleep 1;
-			_newposition = position (leader (MEMBER("group", nil)));
+			_newposition = position _leader;
 			if(format["%1", _oldposition] == format["%1", _newposition]) then {
 				false;
 			} else {
