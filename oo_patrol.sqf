@@ -27,7 +27,7 @@
 		PRIVATE VARIABLE("array","center");
 		PRIVATE VARIABLE("array","enemyside");
 		PRIVATE VARIABLE("array","waypoint");
-
+		PRIVATE VARIABLE("bool","patrol");
 
 		PUBLIC FUNCTION("array","constructor") {
 			MEMBER("group", _this select 0);
@@ -39,11 +39,12 @@
 		};
 
 		PUBLIC FUNCTION("string", "Scan") {
-			private ["_areasize", "_cibles", "_enemyside", "_list", "_position"];
+			private ["_areasize", "_cibles", "_enemyside", "_leader", "_list", "_position"];
 
 			_areasize = MEMBER("areasize", nil);
 			_position = MEMBER("center", nil);
 			_enemyside = MEMBER("enemyside", nil);
+			_leader = leader(MEMBER("group", nil));
 
 			_list = _position nearEntities [["Man"], _areasize];
 
@@ -51,14 +52,27 @@
 				_cibles = [];
 				{
 					if(side _x in _enemyside) then {
-						_cibles = _cibles + [_x];
+						if(_leader knowsabout _x > 0.4) then {
+							_cibles = _cibles + [_x];
+						};
 					} else {
 						_list = _list - [_x];
 					};
 					sleep 0.1;
 				}foreach _list;
+			};			
+		};
+
+		PUBLIC FUNCTION("array", "SeeTarget") {
+			private ["_cible", "_leader", "_position"];
+			_cible = _this;
+			_leader = leader(MEMBER("group", nil));
+			_position = _leader getHideFrom _cible;
+			if(_position distance _cible < 4) then {
+				true;
+			} else {
+				false;
 			};
-			_cibles;
 		};
 
 		PUBLIC FUNCTION("array", "Move") {
@@ -83,13 +97,42 @@
 		};
 
 		PUBLIC FUNCTION("string", "CheckMovement") {
-			if(MEMBER("GoalDistance", "") > 25) then {
-				true;
-			} else {
+			private ["_oldposition", "_newposition"];
+			_oldposition = position (leader (MEMBER("group", nil)));
+			sleep 1;
+			_newposition = position (leader (MEMBER("group", nil)));
+			if(format["%1", _oldposition] == format["%1", _newposition]) then {
 				false;
+			} else {
+				true;
 			};
 		};
 
+		PUBLIC FUNCTION("string", "StartPatrol") {
+			private ["_cibles", "_position"];
+
+			MEMBER("Patrol", true);
+			while { MEMBER("patrol", nil) } do {
+				_cibles = MEMBER("Scan", "");
+				if(count _cibles > 0) then {
+					_position = position (_cibles select 0);
+				} else {
+					_position = MEMBER("RandomPos", "");
+				};
+				MEMBER("Move", _position);
+				sleep 60;
+			};
+		};
+
+		PUBLIC FUNCTION("string", "StopPatrol") {
+			private ["_group"];
+			MEMBER("Patrol", false);
+
+			_group = MEMBER("group", nil);
+			while {(count (waypoints _group)) > 0} do { 
+				deleteWaypoint ((waypoints _group) select 0); 
+			};
+		};
 
 		PUBLIC FUNCTION("string", "RandomPos") {
 			private ["_areasize", "_newx", "_newy", "_position"];
@@ -112,6 +155,7 @@
 			DELETE_VARIABLE("areasize");
 			DELETE_VARIABLE("center");
 			DELETE_VARIABLE("enemyside");
+			DELETE_VARIABLE("patrol");
 			DELETE_VARIABLE("waypoint");
 		};
 	ENDCLASS;
