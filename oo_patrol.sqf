@@ -22,6 +22,7 @@
 
 	CLASS("OO_PATROL")
 
+		PRIVATE VARIABLE("array","cibles");
 		PRIVATE VARIABLE("group","group");
 		PRIVATE VARIABLE("scalar","areasize");
 		PRIVATE VARIABLE("array","center");
@@ -36,6 +37,7 @@
 			if(side (leader MEMBER("group", nil)) == west) then { _side = [east]; MEMBER("enemyside", _side);};
 			if(side (leader MEMBER("group", nil)) == east) then { _side = [west]; MEMBER("enemyside", _side);};
 			if(side (leader MEMBER("group", nil)) == resistance) then { _side = [west]; MEMBER("enemyside", _side);};
+			MEMBER("Scan", "");
 		};
 
 		PUBLIC FUNCTION("string", "Scan") {
@@ -61,15 +63,41 @@
 					sleep 0.1;
 				}foreach _list;
 			};
-			_cibles;
+			MEMBER("cibles", _cibles);
+		};
+
+		PUBLIC FUNCTION("array", "SetTarget") {
+			private["_unit", "_target];
+
+			_unit = _this select 0;
+			_target = _this select 1;
+
+			_unit dotarget _target;
+			_unit dofire _target;
+		};
+
+		PUBLIC FUNCTION("string", "Monitor") {
+			private ["_unit", "_target"];
+			{
+				_unit = _x;
+				{
+					if(MEMBER("SeeTarget", [_unit, x])) then {
+						MEMBER("SetTarget", [_unit, _x]);
+					};
+					sleep 0.01;
+				} foreach MEMBER("cibles", nil);
+				sleep 0.01;
+			}foreach units MEMBER("group", nil);
 		};
 
 		PUBLIC FUNCTION("array", "SeeTarget") {
-			private ["_cible", "_leader", "_position"];
-			_cible = _this;
-			_leader = leader(MEMBER("group", nil));
-			_position = _leader getHideFrom _cible;
-			if(_position distance _cible < 4) then {
+			private ["_target", "_leader", "_position", "_unit"];
+
+			_unit = _this select 0;
+			_target = _this select 1;
+
+			_position = _unit getHideFrom _target;
+			if(_position distance _target < 4) then {
 				true;
 			} else {
 				false;
