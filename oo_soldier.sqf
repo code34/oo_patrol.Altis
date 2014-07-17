@@ -22,55 +22,25 @@
 
 	CLASS("OO_SOLDIER")
 
-		PRIVATE VARIABLE("array","cibles");
-		PRIVATE VARIABLE("group","group");
-		PRIVATE VARIABLE("scalar","areasize");
-		PRIVATE VARIABLE("array","center");
-		PRIVATE VARIABLE("array","enemyside");
-		PRIVATE VARIABLE("array","waypoint");
-		PRIVATE VARIABLE("bool","patrol");
+		PRIVATE VARIABLE("object","unit");
+		PRIVATE VARIABLE("object","target");
 
 		PUBLIC FUNCTION("array","constructor") {
-			MEMBER("group", _this select 0);
-			MEMBER("areasize", _this select 1);
-			MEMBER("center", _this select 2);
-			if(side (leader MEMBER("group", nil)) == west) then { _side = [east]; MEMBER("enemyside", _side);};
-			if(side (leader MEMBER("group", nil)) == east) then { _side = [west]; MEMBER("enemyside", _side);};
-			if(side (leader MEMBER("group", nil)) == resistance) then { _side = [west]; MEMBER("enemyside", _side);};
-			MEMBER("Scan", "");
+			MEMBER("unit", _this select 0);
 		};
 
 		PUBLIC FUNCTION("array", "SetTarget") {
-			private["_unit", "_target];
-
-			_unit = _this select 0;
-			_target = _this select 1;
-
-			_unit dotarget _target;
-			_unit dofire _target;
-		};
-
-		PUBLIC FUNCTION("string", "Monitor") {
-			private ["_unit", "_target"];
-			{
-				_unit = _x;
-				{
-					if(MEMBER("SeeTarget", [_unit, x])) then {
-						MEMBER("SetTarget", [_unit, _x]);
-					};
-					sleep 0.01;
-				} foreach MEMBER("cibles", nil);
-				sleep 0.01;
-			}foreach units MEMBER("group", nil);
+			MEMBER("target", _this select 0);
+			MEMBER("unit", nil) dotarget (_this select 0);
+			MEMBER("unit", nil) dofire (_this select 0);
 		};
 
 		PUBLIC FUNCTION("array", "SeeTarget") {
-			private ["_target", "_leader", "_position", "_unit"];
+			private ["_target", "_position"];
 
-			_unit = _this select 0;
-			_target = _this select 1;
+			_target = _this select 0;
 
-			_position = _unit getHideFrom _target;
+			_position = MEMBER("unit", nil) getHideFrom _target;
 			if(_position distance _target < 4) then {
 				true;
 			} else {
@@ -79,32 +49,16 @@
 		};
 
 		PUBLIC FUNCTION("array", "Move") {
-			private ["_position", "_group", "_wp"];
-			_position = _this;
-
-			_group = MEMBER("group", nil);
-			_group setBehaviour "AWARE";
-			_group setCombatMode "RED";
-
-			_wp = _group addWaypoint [_position, 0];
-			_wp setWaypointPosition [_position, 0];
-			_wp setWaypointType "DESTROY";
-			_wp setWaypointVisible true;
-			_wp setWaypointSpeed "LIMITED";
-			_group setCurrentWaypoint _wp;
-			MEMBER("waypoint", _wp);
+			MEMBER("unit", nil) domove (_this select 0);
 		};
 
-		PUBLIC FUNCTION("string", "GoalDistance") {
-			leader (MEMBER("group", nil)) distance waypointPosition(MEMBER("waypoint", nil));
-		};
+		PUBLIC FUNCTION("", "IsMoving") {
+			private ["_oldposition", "_newposition"];
 
-		PUBLIC FUNCTION("string", "CheckMovement") {
-			private ["_leader", "_oldposition", "_newposition"];
-			_leader = leader (MEMBER("group", nil));
-			_oldposition = position _leader;
+			_oldposition = position MEMBER("unit", nil);
 			sleep 1;
-			_newposition = position _leader;
+			_newposition = position MEMBER("unit", nil);
+
 			if(format["%1", _oldposition] == format["%1", _newposition]) then {
 				false;
 			} else {
@@ -112,29 +66,13 @@
 			};
 		};
 
-
-		PUBLIC FUNCTION("string", "RandomPos") {
-			private ["_areasize", "_newx", "_newy", "_position"];
-
-			_position = MEMBER("center", nil);
-			_areasize = MEMBER("areasize", nil);
-
-			if(random 1 > 0.5) then {
-				_newx = (_position select 0) + ((random _areasize) * -1 );
-				_newy = (_position select 1) + ((random _areasize) * -1 );
-			} else {
-				_newx = (_position select 0) + (random _areasize);
-				_newy = (_position select 1) + (random _areasize);
-			};
-			[_newx, _newy];
+		PUBLIC FUNCTION("", "IsCover") {
+			isHidden MEMBER("unit", nil);
 		};
 
+
 		PUBLIC FUNCTION("","deconstructor") { 
-			DELETE_VARIABLE("group");
-			DELETE_VARIABLE("areasize");
-			DELETE_VARIABLE("center");
-			DELETE_VARIABLE("enemyside");
-			DELETE_VARIABLE("patrol");
-			DELETE_VARIABLE("waypoint");
+			DELETE_VARIABLE("target");
+			DELETE_VARIABLE("unit");
 		};
 	ENDCLASS;
