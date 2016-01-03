@@ -1,8 +1,8 @@
-	/*
-	Author: code34 nicolas_boiteux@yahoo.fr
-	Copyright (C) 2013 Nicolas BOITEUX
 
-	CLASS OO_PATROL -  A simple Patrol script
+	Author: code34 nicolas_boiteux@yahoo.fr
+	Copyright (C) 2013-2016 Nicolas BOITEUX
+
+	CLASS OO_PATROL - Patrol script
 	
 	This program is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -16,4 +16,19 @@
 	
 	You should have received a copy of the GNU General Public License
 	along with this program.  If not, see <http://www.gnu.org/licenses/>. 
-	*/
+
+	--------------------------------------------------------------------------------------------------------------
+
+	Function:  _patrol = ["new", ""] call OO_PATROL;
+	Create a new patrol object 
+		
+	Parameters:
+
+	--------------------------------------------------------------------------------------------------------------
+	
+	Function:  ["delete", _pdw] call OO_PATROL;
+	Destroy the patrol object 
+		
+	Parameters: object - patrol object
+	
+	Return : nothing

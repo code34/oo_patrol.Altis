@@ -1,8 +1,8 @@
 	/*
 	Author: code34 nicolas_boiteux@yahoo.fr
-	Copyright (C) 2013 Nicolas BOITEUX
+	Copyright (C) 2013-2016 Nicolas BOITEUX
 
-	CLASS OO_PATROL -  A simple Patrol Script
+	CLASS OO_PATROL - Patrol script
 	
 	This program is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -21,9 +21,9 @@
 	Create a main bus message between clients & server
 	
 	Usage:
-		put the "oo_patrol.sqf" and the "oop.h" files in your mission directory
+		put the "oo_pdw.sqf" and the "oop.h" files in your mission directory
 		put this code into your mission init.sqf
-		call compilefinal preprocessFileLineNumbers "oo_patrol.sqf";
+		call compilefinal preprocessFileLineNumbers "oo_pdw.sqf";
 
 	See example mission in directory: init.sqf
 	
@@ -31,6 +31,6 @@
 	You can share, modify, distribute this script but don't remove the licence and the name of the original author
 
 	logs:
-		0.1 - OO PATROL - first release
+		0.1 	- OO PATROL - first release
 
 
