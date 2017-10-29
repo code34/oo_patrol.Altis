@@ -1,10 +1,9 @@
 		[] call compilefinal preprocessFileLineNumbers "oo_patrol.sqf";
 
-		_patrol = ["new", [group toto, 200, position toto]] call OO_PATROL;
+		sleep 2;
 
-		sleep 5;
-
-		_position = ["StartPatrol", ""] call _patrol;
+		_patrol = ["new", group toto] call OO_PATROL;
+		["patrol", [position player, 100]] call _patrol;
 
 
 
