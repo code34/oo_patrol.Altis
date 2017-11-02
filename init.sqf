@@ -1,4 +1,4 @@
-		[] call compilefinal preprocessFileLineNumbers "oo_patrol.sqf";
+		call compile preprocessFileLineNumbers "oo_patrol.sqf";
 
 		sleep 2;
 
