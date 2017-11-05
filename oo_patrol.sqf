@@ -35,6 +35,7 @@
 		PRIVATE VARIABLE("array","targets");
 
 		PUBLIC FUNCTION("group","constructor") {
+			DEBUG(#, "OO_PATROL::constructor")
 			MEMBER("group", _this);
 			MEMBER("areasize", 0);
 			MEMBER("sizegroup", count (units _this));
@@ -48,6 +49,7 @@
 		PUBLIC FUNCTION("","getTarget") FUNC_GETVAR("target");
 
 		PUBLIC FUNCTION("", "setFlank") {
+			DEBUG(#, "OO_PATROL::setFlank")
 			if(random 1 > 0.5) then {
 				MEMBER("flank", 110);
 			} else {
@@ -60,6 +62,7 @@
 		@position : position of patrol
 		*/
 		PUBLIC FUNCTION("array", "patrol") {
+			DEBUG(#, "OO_PATROL::patrol")
 			private _position = _this select 0;
 			private _areasize = _this select 1;
 			MEMBER("walk", _areasize);
@@ -79,6 +82,7 @@
 		@position
 		*/
 		PUBLIC FUNCTION("array", "attack") {	
+			DEBUG(#, "OO_PATROL::attack")
 			private _position = _this;
 			private _group = MEMBER("group", nil);
 
@@ -97,6 +101,7 @@
 		Return : array containing all positions in building
 		*/
 		PUBLIC FUNCTION("array", "getPositionsBuilding") {
+			DEBUG(#, "OO_PATROL::getPositionsBuilding")
 			private _positions = [];
 			private _buildings = [];
 			private _index = 0;
@@ -113,6 +118,7 @@
 
 
 		PUBLIC FUNCTION("array", "getBuildings") {
+			DEBUG(#, "OO_PATROL::getBuildings")
 			private _position = _this;
 			private _positions = MEMBER("getPositionsBuilding", _position);
 
@@ -125,6 +131,7 @@
 		};
 
 		PUBLIC FUNCTION("", "fireFlare") {
+			DEBUG(#, "OO_PATROL::fireFlare")
 			private _leader = leader MEMBER("group", nil);
 			private _target = MEMBER("target", nil);
 
@@ -135,6 +142,7 @@
 		};
 
 		PUBLIC FUNCTION("", "engageTarget") {
+			DEBUG(#, "OO_PATROL::engageTarget")
 			private _target = MEMBER("target", nil);
 			if(isNil "_target") exitWith {};
 
@@ -177,8 +185,7 @@
 
 
 		PUBLIC FUNCTION("", "getNextTarget") {
-			private ["_array", "_candidats", "_index", "_leader", "_target", "_min", "_oldtarget"];
-			
+			DEBUG(#, "OO_PATROL::getNextTarget")		
 			private _leader = leader MEMBER("group", nil);
 			private _candidats = [];
 			private _target = MEMBER("target", nil);
@@ -218,6 +225,7 @@
 		};		
 
 		PUBLIC FUNCTION("", "revealTarget") {
+			DEBUG(#, "OO_PATROL::revealTarget")
 			{
 				leader MEMBER("group", nil) reveal [_x, 4];
 				sleep 0.0001;
@@ -225,6 +233,7 @@
 		};		
 
 		PUBLIC FUNCTION("array", "getTargets") {
+			DEBUG(#, "OO_PATROL::getTargets")
 			private _list = _this nearEntities [["Man"], 800];
 			private _list2 = _this nearEntities [["Tank", "Air"], 800];
 			sleep 1;
@@ -245,6 +254,7 @@
 		};		
 
 		PUBLIC FUNCTION("", "seeTarget") {
+			DEBUG(#, "OO_PATROL::seeTarget")
 			private _see = false;
 			private _target =  MEMBER("target", nil);
 			private _array = [];
@@ -260,10 +270,12 @@
 		};		
 
 		PUBLIC FUNCTION("array", "estimateTarget") {		
+			DEBUG(#, "OO_PATROL::estimateTarget")
 			((_this select 0) getHideFrom (_this select 1)) distance (position (_this select 1));
 		};
 
-		PUBLIC FUNCTION("", "doFire") {		
+		PUBLIC FUNCTION("", "doFire") {
+			DEBUG(#, "OO_PATROL::doFire")
 			private _target = MEMBER("target", nil);
 			private _skill = 0;
 			{
@@ -278,12 +290,14 @@
 		};
 
 		PUBLIC FUNCTION("scalar", "getSkill") {
+			DEBUG(#, "OO_PATROL::getSkill")
 			if(_this > 300) then {_this = 300};
 			(wcskill * (1 - (_this / 300)));
 		};
 
 		// moveInto Buildings
 		PUBLIC FUNCTION("object", "moveInto") {
+			DEBUG(#, "OO_PATROL::moveInto")
 			private _building = _this;
 			private _positions = [];
 			private _index = 0;
@@ -303,12 +317,14 @@
 
 		// move around target
 		PUBLIC FUNCTION("", "moveToTarget") {
+			DEBUG(#, "OO_PATROL::moveToTarget")
 			private _position = position MEMBER("target", nil);
 			MEMBER("moveTo", _position);
 		};
 
 		// move around target
 		PUBLIC FUNCTION("scalar", "moveAround") {
+			DEBUG(#, "OO_PATROL::moveAround")
 			private _areasize = _this;
 			private _target = MEMBER("target", nil);
 			private _leader = leader MEMBER("group", nil);
@@ -324,6 +340,7 @@
 
 		// put mine
 		PUBLIC FUNCTION("", "putMine") {
+			DEBUG(#, "OO_PATROL::putMine")
 			private _target = MEMBER("target", nil);
 			private _leader = leader MEMBER("group", nil);
 
@@ -334,6 +351,7 @@
 
 		// moveTo position
 		PUBLIC FUNCTION("array", "moveTo") {
+			DEBUG(#, "OO_PATROL::moveTo")
 			private _position = _this;
 			private _group = MEMBER("group", nil);
 
@@ -346,12 +364,14 @@
 		};		
 
 		PUBLIC FUNCTION("", "isCompleteGroup") {
+			DEBUG(#, "OO_PATROL::isCompleteGroup")
 			private _count = MEMBER("sizegroup", nil);
 			private _count2 = count units (MEMBER("group", nil));
 			if( _count isEqualTo _count2) then { true; } else { false;};
 		};
 
 		PUBLIC FUNCTION("", "dropSmoke") {
+			DEBUG(#, "OO_PATROL::dropSmoke")
 			private _group = MEMBER("group", nil);
 			private _round = ceil(random 3);
 			private _smokeposition = [];
@@ -364,16 +384,19 @@
 		};
 
 		PUBLIC FUNCTION("", "dropFlare") {
+			DEBUG(#, "OO_PATROL::dropFlare")
 			if((date select 3 < 4) or (date select 3 > 20)) then {
 
 			};
 		};		
 
 		PUBLIC FUNCTION("", "setAlert") {
+			DEBUG(#, "OO_PATROL::setAlert")
 			MEMBER("alert", true);
 		};
 
 		PUBLIC FUNCTION("", "scanTargets") {
+			DEBUG(#, "OO_PATROL::scanTargets")
 			{
 				if((leader MEMBER("group", nil)) knowsAbout _x > 0.40) then {
 					MEMBER("setAlert", nil);
@@ -383,7 +406,8 @@
 		};		
 
 		// soldiers walk around the sector
-		PUBLIC FUNCTION("scalar", "walk") {		
+		PUBLIC FUNCTION("scalar", "walk") {
+			DEBUG(#, "OO_PATROL::walk")
 			private _group = MEMBER("group", nil);
 			private _leader = leader _group;
 			private _areasize = _this;
@@ -414,11 +438,11 @@
 			_counter = 0;
 			while { _counter < _maxtime } do {
 				_leader = leader _group;
-				if(format["%1",  _leader getVariable "complete"] == "true") then {
+				if(format["%1",  _leader getVariable "complete"] isEqualTo "true") then {
 					_leader setvariable ['complete', false];
 					_counter = _maxtime;
 				};
-				if(format["%1",  _leader getVariable "combat"] == "true") then {
+				if(format["%1",  _leader getVariable "combat"] isEqualTo "true") then {
 					if(random 1 > 0.8) then {MEMBER("dropSmoke", nil);};
 					MEMBER("setAlert", nil);
 					_counter = _maxtime;
@@ -430,7 +454,8 @@
 			deletewaypoint _wp;
 		};
 
-		PUBLIC FUNCTION("", "walkInBuildings") {	
+		PUBLIC FUNCTION("", "walkInBuildings") {
+			DEBUG(#, "OO_PATROL::walkInBuildings")
 			private _group = MEMBER("group", nil);
 			private _leader = leader _group;
 			private _areasize = MEMBER("areasize", nil);
@@ -461,6 +486,7 @@
 		};		
 
 		PUBLIC FUNCTION("", "setBuildingMode") {
+			DEBUG(#, "OO_PATROL::setBuildingMode")
 			MEMBER("group", nil) setBehaviour "SAFE";
 			MEMBER("group", nil) setCombatMode "WHITE";
 			MEMBER("group", nil) setSpeedMode "FULL";
@@ -468,6 +494,7 @@
 		};
 
 		PUBLIC FUNCTION("", "setMoveMode") {
+			DEBUG(#, "OO_PATROL::setMoveMode")
 			MEMBER("group", nil) setBehaviour "AWARE";
 			MEMBER("group", nil) setCombatMode "RED";
 			MEMBER("group", nil) setSpeedMode "FULL";
@@ -475,6 +502,7 @@
 		};		
 
 		PUBLIC FUNCTION("", "setSafeMode") {
+			DEBUG(#, "OO_PATROL::setSafeMode")
 			MEMBER("group", nil) setBehaviour "SAFE";
 			MEMBER("group", nil) setCombatMode "GREEN";
 			MEMBER("group", nil) setSpeedMode "NORMAL";
@@ -482,6 +510,7 @@
 		};
 
 		PUBLIC FUNCTION("", "setCombatMode") {
+			DEBUG(#, "OO_PATROL::setCombatMode")
 			MEMBER("group", nil) setBehaviour "COMBAT";
 			MEMBER("group", nil) setCombatMode "RED";
 			MEMBER("group", nil) setSpeedMode "FULL";
@@ -489,6 +518,7 @@
 		};
 
 		PUBLIC FUNCTION("","deconstructor") { 
+			DEBUG(#, "OO_PATROL::deconstructor")
 			DELETE_VARIABLE("alert");
 			DELETE_VARIABLE("around");
 			DELETE_VARIABLE("areasize");
