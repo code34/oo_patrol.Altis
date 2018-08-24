@@ -4,10 +4,3 @@
 
 		_patrol = ["new", group toto] call OO_PATROL;
 		["patrol", [position player, 100]] call _patrol;
-
-
-
-		
-	
-
-
