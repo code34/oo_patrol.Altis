@@ -60,6 +60,7 @@
 			while { true } do {
 				switch (MEMBER("event", nil)) do {
 					case "alert": {
+						systemChat "engaging..";
 						MEMBER("getNextTarget", nil);
 						MEMBER("engageTarget", nil);
 					};
@@ -80,7 +81,7 @@
 			while { true } do {
 				MEMBER("getTargets", nil);
 				MEMBER("scanTargets", nil);
-				sleep 5;
+				sleep 10;
 			};
 		};
 
@@ -145,21 +146,11 @@
 				MEMBER("putMine", nil);
 			} else {
 				if(_isbuilding) then {
-					//hint "movebuilding";
-					if(_isvisible) then {
-						MEMBER("doFire", nil);
-					};
 					MEMBER("setCombatMode", nil);
 					MEMBER("moveInto", nearestbuilding _target);
 				} else {
 					if((_needflare) and (random 1 > 0.5)) then { MEMBER("fireFlare", nil);};
 					if(_isvisible) then {
-						//hint format ["moveto %1", MEMBER("target", nil)];
-						MEMBER("setCombatMode", nil);
-						MEMBER("doFire", nil);
-						MEMBER("moveToTarget", nil);
-					} else {
-						//hint format ["movearound %1", MEMBER("target", nil)];
 						MEMBER("setCombatMode", nil);
 						MEMBER("moveAround", 25);
 					};
@@ -206,27 +197,26 @@
 			};
 		};
 
-		PUBLIC FUNCTION("", "revealTarget") {
-			DEBUG(#, "OO_PATROL::revealTarget")
-			{
-				leader MEMBER("group", nil) reveal [_x, 4];
-				sleep 0.0001;
-			}foreach units MEMBER("targets", nil);
-		};		
-
 		PUBLIC FUNCTION("", "getTargets") {
 			DEBUG(#, "OO_PATROL::getTargets")
 			private _side = side (leader MEMBER("group", nil));
 			private _position = position leader(MEMBER("group", nil));
+			private _array = [];
 			private _list = _position nearEntities [["Man"], 800];
 			private _list2 = _position nearEntities [["Tank", "Air"], 800];
 			sleep 1;
 
 			{
-				if(!(side _x isEqualTo _side) and !(side_x isEqualTo civilian)) then { _list pushBack (crew _x);	};
+				if(!(side _x isEqualTo _side) and !(side _x isEqualTo civilian)) then { _array pushBack _x;};
+				sleep 0.001;
+			}foreach _list;
+
+			{
+				private _driver = driver _x;
+				if(!(side _driver isEqualTo _side) and !(side _driver isEqualTo civilian)) then { _array = _array + (crew _x);};
 				sleep 0.001;
 			}foreach _list2;
-			MEMBER("targets", _list);
+			MEMBER("targets", _array);
 		};
 
 		PUBLIC FUNCTION("", "seeTarget") {
@@ -282,13 +272,6 @@
 		};
 
 		// move around target
-		PUBLIC FUNCTION("", "moveToTarget") {
-			DEBUG(#, "OO_PATROL::moveToTarget")
-			private _position = position MEMBER("target", nil);
-			MEMBER("moveTo", _position);
-		};
-
-		// move around target
 		PUBLIC FUNCTION("scalar", "moveAround") {
 			DEBUG(#, "OO_PATROL::moveAround")
 			private _areasize = _this;
@@ -316,19 +299,36 @@
 			};
 		};		
 
-		// moveTo position
+		// soldiers attack the sector
 		PUBLIC FUNCTION("array", "moveTo") {
 			DEBUG(#, "OO_PATROL::moveTo")
-			private _position = _this;
 			private _group = MEMBER("group", nil);
+			private _leader = leader _group;
+			private _maxtime = 60;
+			private _counter = 0;
 
-			{
-				_x domove _position;
-				sleep 0.001;
-			}foreach units _group;
+			private _position = _this;
+			private _wp = _group addWaypoint [_position, 0];
+			_wp setWaypointPosition [_position, 0];
+			_wp setWaypointType "SAD";
+			_wp setWaypointVisible true;
+			_wp setWaypointSpeed "FULL";
+			_group setCurrentWaypoint _wp;
+
+			private _name = format["target_%1", groupId _group];
+			private _marker = createMarkerLocal [_name,_position];
+			_marker setMarkerShapeLocal "ICON";
+			_marker setMarkerTypeLocal "waypoint";
+			_marker setMarkerText _name;
+			_marker setMarkerColor "ColorRed";
 
 			sleep 30;
-		};		
+
+			deleteMarker _marker;
+			deletewaypoint _wp;
+		};
+
+
 
 		PUBLIC FUNCTION("", "isCompleteGroup") {
 			DEBUG(#, "OO_PATROL::isCompleteGroup")
@@ -405,7 +405,7 @@
 			_counter = 0;
 			while { _counter < _maxtime } do {
 				_leader = leader _group;
-				if!(MEMBER("event", nil) isEqualTo "") then { _counter = _maxtime;};
+				if!(MEMBER("event", nil) isEqualTo "alert") then { _counter = _maxtime;};
 				if(_leader distance _position < 5) then { 	_counter = _maxtime; };
 				_counter = _counter + 1;
 				sleep 1;
@@ -431,7 +431,7 @@
 
 			while { _counter < _maxtime } do {
 				_leader = leader _group;
-				if!(MEMBER("event", nil) isEqualTo "") then { _counter = _maxtime;};
+				if(MEMBER("event", nil) isEqualTo "alert") then { _counter = _maxtime;};
 				MEMBER("scanTargets", nil);
 				_counter = _counter + 1;
 				sleep 1;
