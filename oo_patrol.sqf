@@ -39,7 +39,6 @@
 			MEMBER("sizegroup", count (units _this));
 			MEMBER("alert", false);
 			MEMBER("event", "");
-			systemChat "Initiliazing OO_PATROL v 0.01";
 		};
 
 		PUBLIC FUNCTION("","getGroup") FUNC_GETVAR("group");
@@ -56,31 +55,32 @@
 
 			private _array = [_position, _areasize];
 			MEMBER("getBuildings", _array);
+			SPAWN_MEMBER("analysis", nil);
 
 			while { true } do {
-				if(MEMBER("city", nil)) then {
-					MEMBER("walkInBuildings", nil);
-				} else {
-					MEMBER("walk", _areasize);
+				switch (MEMBER("event", nil)) do {
+					case "alert": {
+						MEMBER("getNextTarget", nil);
+						MEMBER("engageTarget", nil);
+					};
+					case "city": {
+						MEMBER("walkInBuildings", nil);
+					};
+					default{
+						MEMBER("walk", _areasize);
+					};
 				};
 			};
 		};
 
 		/*
-		Attack targets around a position
-		@position
+		Analysis enemies information
 		*/
-		PUBLIC FUNCTION("array", "attack") {	
-			DEBUG(#, "OO_PATROL::attack")
-			private _position = _this;
-			private _group = MEMBER("group", nil);
-
-			MEMBER("setCombatMode", nil);
-			while { count (units _group) > 0 } do {
-				MEMBER("getTargets", _position);
-				MEMBER("getNextTarget", nil);
-				MEMBER("engageTarget", nil);
-				sleep 0.1;
+		PUBLIC FUNCTION("", "analysis") {
+			while { true } do {
+				MEMBER("getTargets", nil);
+				MEMBER("scanTargets", nil);
+				sleep 5;
 			};
 		};
 
@@ -114,9 +114,7 @@
 
 			MEMBER("buildings", _positions);
 			if(count _positions > 10) then {
-				MEMBER("city", true);
-			}else{
-				MEMBER("city", false);
+				MEMBER("event", "city");
 			};
 		};
 
@@ -152,7 +150,6 @@
 						MEMBER("doFire", nil);
 					};
 					MEMBER("setCombatMode", nil);
-					//MEMBER("setMoveMode", nil);
 					MEMBER("moveInto", nearestbuilding _target);
 				} else {
 					if((_needflare) and (random 1 > 0.5)) then { MEMBER("fireFlare", nil);};
@@ -168,11 +165,7 @@
 					};
 				};
 			};
-			if(random 1 > 0.9) then {
-				MEMBER("callArtillery", MEMBER("target", nil));
-			};
 		};
-
 
 		PUBLIC FUNCTION("", "getNextTarget") {
 			DEBUG(#, "OO_PATROL::getNextTarget")
@@ -210,7 +203,6 @@
 
 			if(_oldtarget != _target) then {
 				MEMBER("target", _target);
-				MEMBER("setFlank", nil);
 			};
 		};
 
@@ -222,24 +214,18 @@
 			}foreach units MEMBER("targets", nil);
 		};		
 
-		PUBLIC FUNCTION("array", "getTargets") {
+		PUBLIC FUNCTION("", "getTargets") {
 			DEBUG(#, "OO_PATROL::getTargets")
-			private _list = _this nearEntities [["Man"], 800];
-			private _list2 = _this nearEntities [["Tank", "Air"], 800];
+			private _side = side (leader MEMBER("group", nil));
+			private _position = position leader(MEMBER("group", nil));
+			private _list = _position nearEntities [["Man"], 800];
+			private _list2 = _position nearEntities [["Tank", "Air"], 800];
 			sleep 1;
-			{
-				_list pushBack (crew _x);
-				sleep 0.0001;
-			}foreach _list2;
 
-			sleep 0.5;
 			{
-				if(side _x != west) then {
-					_list set [_foreachindex, -1];
-				};
-				sleep 0.0001;
-			}foreach _list;
-			_list = _list - [-1];
+				if(!(side _x isEqualTo _side) and !(side_x isEqualTo civilian)) then { _list pushBack (crew _x);	};
+				sleep 0.001;
+			}foreach _list2;
 			MEMBER("targets", _list);
 		};
 
@@ -267,22 +253,12 @@
 		PUBLIC FUNCTION("", "doFire") {
 			DEBUG(#, "OO_PATROL::doFire")
 			private _target = MEMBER("target", nil);
-			private _skill = 0;
 			{
-				_skill = MEMBER("getSkill", (_x distance _target));
-				_x setskill ["aimingAccuracy", _skill];
-				_x setskill ["aimingShake", _skill];
 				_x dotarget _target;
 				_x dofire _target;
 				_x setUnitPos "Middle";
-				sleep 0.0001;
+				sleep 0.001;
 			}foreach units MEMBER("group", nil);
-		};
-
-		PUBLIC FUNCTION("scalar", "getSkill") {
-			DEBUG(#, "OO_PATROL::getSkill")
-			if(_this > 300) then {_this = 300};
-			(wcskill * (1 - (_this / 300)));
 		};
 
 		// moveInto Buildings
@@ -379,20 +355,13 @@
 			if((date select 3 < 4) or (date select 3 > 20)) then {
 
 			};
-		};		
-
-		PUBLIC FUNCTION("", "setAlert") {
-			DEBUG(#, "OO_PATROL::setAlert")
-			MEMBER("alert", true);
 		};
 
 		PUBLIC FUNCTION("", "scanTargets") {
 			DEBUG(#, "OO_PATROL::scanTargets")
 			{
-				if((leader MEMBER("group", nil)) knowsAbout _x > 0.40) then {
-					MEMBER("setAlert", nil);
-				};
-				sleep 0.0001;
+				if((leader MEMBER("group", nil)) knowsAbout _x > 0.40) then { MEMBER("event", "alert"); };
+				sleep 0.001;
 			}foreach MEMBER("targets", nil);
 		};
 
