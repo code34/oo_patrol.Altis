@@ -394,7 +394,7 @@
 				};
 				sleep 0.0001;
 			}foreach MEMBER("targets", nil);
-		};		
+		};
 
 		// soldiers walk around the sector
 		PUBLIC FUNCTION("scalar", "walk") {
