@@ -27,9 +27,8 @@
 		PRIVATE VARIABLE("array","around");
 		PRIVATE VARIABLE("array","buildings");
 		PRIVATE VARIABLE("bool","city");
-		PRIVATE VARIABLE("bool","event");
+		PRIVATE VARIABLE("string","event");
 		PRIVATE VARIABLE("group","group");
-		PRIVATE VARIABLE("scalar","flank");
 		PRIVATE VARIABLE("scalar","sizegroup");
 		PRIVATE VARIABLE("object","target");
 		PRIVATE VARIABLE("array","targets");
@@ -41,21 +40,12 @@
 			MEMBER("sizegroup", count (units _this));
 			MEMBER("getBuildings", nil);
 			MEMBER("alert", false);
-			MEMBER("setFlank", nil);
-			MEMBER("event", false);
+			MEMBER("event", "");
+			systemChat "Initiliazing OO_PATROL v 0.01";
 		};
 
 		PUBLIC FUNCTION("","getGroup") FUNC_GETVAR("group");
 		PUBLIC FUNCTION("","getTarget") FUNC_GETVAR("target");
-
-		PUBLIC FUNCTION("", "setFlank") {
-			DEBUG(#, "OO_PATROL::setFlank")
-			if(random 1 > 0.5) then {
-				MEMBER("flank", 110);
-			} else {
-				MEMBER("flank", -110);
-			};
-		};
 
 		/*
 		Patrol around a position
@@ -65,16 +55,14 @@
 			DEBUG(#, "OO_PATROL::patrol")
 			private _position = _this select 0;
 			private _areasize = _this select 1;
-			MEMBER("walk", _areasize);
 
-			//while { !MEMBER("event", nil) } do {
-				//if(MEMBER("city", nil)) then {
-				//	MEMBER("walkInBuildings", nil);
-				//} else {
-				//	MEMBER("walk", _areasize);
-				//};
-				//sleep 0.1;
-			//};
+			while { true } do {
+				if(MEMBER("city", nil)) then {
+					MEMBER("walkInBuildings", nil);
+				} else {
+					MEMBER("walk", _areasize);
+				};
+			};
 		};
 
 		/*
@@ -107,19 +95,21 @@
 			private _index = 0;
 			
 			if!(surfaceIsWater _this) then {
-				_buildings = nearestObjects[_this,["House_F"], 50];
+				_buildings = nearestObjects[_this,["House_F"], 300];
 				sleep 0.5;
 				{
-					_positions pushBack (_x buildingPos -1);
+					if (count(_x buildingPos -1) > 0) then {
+						_positions = _positions + (_x buildingPos -1);
+					};
 				}foreach _buildings;
 			};
 			_positions;
-		};		
+		};
 
 
-		PUBLIC FUNCTION("array", "getBuildings") {
+		PUBLIC FUNCTION("", "getBuildings") {
 			DEBUG(#, "OO_PATROL::getBuildings")
-			private _position = _this;
+			private _position = position leader(MEMBER("group", nil));
 			private _positions = MEMBER("getPositionsBuilding", _position);
 
 			MEMBER("buildings", _positions);
@@ -222,7 +212,7 @@
 				MEMBER("target", _target);
 				MEMBER("setFlank", nil);
 			};
-		};		
+		};
 
 		PUBLIC FUNCTION("", "revealTarget") {
 			DEBUG(#, "OO_PATROL::revealTarget")
@@ -251,7 +241,7 @@
 			}foreach _list;
 			_list = _list - [-1];
 			MEMBER("targets", _list);
-		};		
+		};
 
 		PUBLIC FUNCTION("", "seeTarget") {
 			DEBUG(#, "OO_PATROL::seeTarget")
@@ -330,7 +320,8 @@
 			private _leader = leader MEMBER("group", nil);
 			private _dir = [_leader, _target] call BIS_fnc_dirTo;
 
-			_dir = _dir + MEMBER("flank", nil);
+			// flanking or not
+			_dir = _dir + selectRandom [110,0,-110];
 			if(_dir > 359) then {_dir = _dir - 360};
 			if(_dir < 0) then {_dir = _dir + 360};
 
@@ -416,7 +407,7 @@
 			private _counter = 0;
 
 			MEMBER("setSafeMode", nil);
-			
+
 			private _formationtype = selectRandom ["COLUMN", "STAG COLUMN","WEDGE","ECH LEFT","ECH RIGHT","VEE","LINE","FILE","DIAMOND"];
 			_group setFormation _formationtype;
 
@@ -435,22 +426,22 @@
 			_wp setWaypointStatements ["true", "this setvariable ['complete', true]; false"];
 			_group setCurrentWaypoint _wp;
 
+			_marker = createMarkerLocal ["target",_position];
+			_marker setMarkerShapeLocal "ICON";
+			_marker setMarkerTypeLocal "waypoint";
+			_marker setMarkerText "target";
+			_marker setMarkerColor "ColorRed";
+
 			_counter = 0;
 			while { _counter < _maxtime } do {
 				_leader = leader _group;
-				if(format["%1",  _leader getVariable "complete"] isEqualTo "true") then {
-					_leader setvariable ['complete', false];
-					_counter = _maxtime;
-				};
-				if(format["%1",  _leader getVariable "combat"] isEqualTo "true") then {
-					if(random 1 > 0.8) then {MEMBER("dropSmoke", nil);};
-					MEMBER("setAlert", nil);
-					_counter = _maxtime;
-				};
-				MEMBER("scanTargets", nil);
+				if!(MEMBER("event", nil) isEqualTo "") then { _counter = _maxtime;};
+				if(_leader distance _position < 5) then { 	_counter = _maxtime; };
 				_counter = _counter + 1;
 				sleep 1;
 			};
+
+			deleteMarker _marker;
 			deletewaypoint _wp;
 		};
 
@@ -470,20 +461,12 @@
 
 			while { _counter < _maxtime } do {
 				_leader = leader _group;
-				if(format["%1",  _leader getVariable "complete"] == "true") then {
-					_leader setvariable ['complete', false];
-					_counter = _maxtime;
-				};
-				if(format["%1",  _leader getVariable "combat"] == "true") then {
-					if(random 1 > 0.8) then {MEMBER("dropSmoke", nil);};
-					MEMBER("setAlert", nil);
-					_counter = _maxtime;
-				};
+				if!(MEMBER("event", nil) isEqualTo "") then { _counter = _maxtime;};
 				MEMBER("scanTargets", nil);
 				_counter = _counter + 1;
 				sleep 1;
 			};
-		};		
+		};
 
 		PUBLIC FUNCTION("", "setBuildingMode") {
 			DEBUG(#, "OO_PATROL::setBuildingMode")
@@ -528,6 +511,5 @@
 			DELETE_VARIABLE("targets");
 			DELETE_VARIABLE("buildings");
 			DELETE_VARIABLE("city");
-			DELETE_VARIABLE("flank");
 		};
 	ENDCLASS;

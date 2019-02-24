@@ -3,4 +3,7 @@
 		sleep 2;
 
 		_patrol = ["new", group toto] call OO_PATROL;
-		["patrol", [position player, 100]] call _patrol;
+		["patrol", [position toto, 100]] spawn _patrol;
+
+		_patrol2 = ["new", group tata] call OO_PATROL;
+		["patrol", [position tata, 100]] spawn _patrol2;
