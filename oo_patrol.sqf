@@ -1,4 +1,3 @@
-
 	/*
 	Author: code34 nicolas_boiteux@yahoo.fr
 	Copyright (C) 2014-2018 Nicolas BOITEUX
@@ -38,7 +37,6 @@
 			MEMBER("group", _this);
 			MEMBER("areasize", 0);
 			MEMBER("sizegroup", count (units _this));
-			MEMBER("getBuildings", nil);
 			MEMBER("alert", false);
 			MEMBER("event", "");
 			systemChat "Initiliazing OO_PATROL v 0.01";
@@ -55,6 +53,9 @@
 			DEBUG(#, "OO_PATROL::patrol")
 			private _position = _this select 0;
 			private _areasize = _this select 1;
+
+			private _array = [_position, _areasize];
+			MEMBER("getBuildings", _array);
 
 			while { true } do {
 				if(MEMBER("city", nil)) then {
@@ -94,8 +95,8 @@
 			private _buildings = [];
 			private _index = 0;
 			
-			if!(surfaceIsWater _this) then {
-				_buildings = nearestObjects[_this,["House_F"], 300];
+			if!(surfaceIsWater (_this select 0)) then {
+				_buildings = nearestObjects[_this select 0,["House_F"], _this select 1];
 				sleep 0.5;
 				{
 					if (count(_x buildingPos -1) > 0) then {
@@ -107,10 +108,9 @@
 		};
 
 
-		PUBLIC FUNCTION("", "getBuildings") {
+		PUBLIC FUNCTION("array", "getBuildings") {
 			DEBUG(#, "OO_PATROL::getBuildings")
-			private _position = position leader(MEMBER("group", nil));
-			private _positions = MEMBER("getPositionsBuilding", _position);
+			private _positions = MEMBER("getPositionsBuilding", _this);
 
 			MEMBER("buildings", _positions);
 			if(count _positions > 10) then {
@@ -426,10 +426,11 @@
 			_wp setWaypointStatements ["true", "this setvariable ['complete', true]; false"];
 			_group setCurrentWaypoint _wp;
 
-			_marker = createMarkerLocal ["target",_position];
+			private _name = format["target_%1", groupId _group];
+			private _marker = createMarkerLocal [_name,_position];
 			_marker setMarkerShapeLocal "ICON";
 			_marker setMarkerTypeLocal "waypoint";
-			_marker setMarkerText "target";
+			_marker setMarkerText _name;
 			_marker setMarkerColor "ColorRed";
 
 			_counter = 0;
