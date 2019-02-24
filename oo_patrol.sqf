@@ -108,7 +108,7 @@
 			
 			if!(surfaceIsWater _this) then {
 				_buildings = nearestObjects[_this,["House_F"], 50];
-				sleep 0.5;			
+				sleep 0.5;
 				{
 					_positions pushBack (_x buildingPos -1);
 				}foreach _buildings;
@@ -185,7 +185,7 @@
 
 
 		PUBLIC FUNCTION("", "getNextTarget") {
-			DEBUG(#, "OO_PATROL::getNextTarget")		
+			DEBUG(#, "OO_PATROL::getNextTarget")
 			private _leader = leader MEMBER("group", nil);
 			private _candidats = [];
 			private _target = MEMBER("target", nil);
@@ -269,7 +269,7 @@
 			_see;
 		};		
 
-		PUBLIC FUNCTION("array", "estimateTarget") {		
+		PUBLIC FUNCTION("array", "estimateTarget") {	
 			DEBUG(#, "OO_PATROL::estimateTarget")
 			((_this select 0) getHideFrom (_this select 1)) distance (position (_this select 1));
 		};
