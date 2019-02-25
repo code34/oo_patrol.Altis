@@ -1,6 +1,6 @@
 	/*
 	Author: code34 nicolas_boiteux@yahoo.fr
-	Copyright (C) 2014-2018 Nicolas BOITEUX
+	Copyright (C) 2014-2019 Nicolas BOITEUX
 
 	CLASS OO_PATROL
 	
@@ -21,28 +21,27 @@
 	#include "oop.h"
 
 	CLASS("OO_PATROL")
-		PRIVATE VARIABLE("bool","alert");
 		PRIVATE VARIABLE("scalar","areasize");
-		PRIVATE VARIABLE("array","around");
 		PRIVATE VARIABLE("array","buildings");
-		PRIVATE VARIABLE("bool","city");
 		PRIVATE VARIABLE("string","event");
 		PRIVATE VARIABLE("group","group");
-		PRIVATE VARIABLE("scalar","sizegroup");
 		PRIVATE VARIABLE("object","target");
 		PRIVATE VARIABLE("array","targets");
+		PRIVATE VARIABLE("code","this");
 
 		PUBLIC FUNCTION("group","constructor") {
 			DEBUG(#, "OO_PATROL::constructor")
 			MEMBER("group", _this);
 			MEMBER("areasize", 0);
-			MEMBER("sizegroup", count (units _this));
-			MEMBER("alert", false);
 			MEMBER("event", "");
 		};
 
 		PUBLIC FUNCTION("","getGroup") FUNC_GETVAR("group");
 		PUBLIC FUNCTION("","getTarget") FUNC_GETVAR("target");
+
+		PUBLIC FUNCTION("string", "setEvent") {
+			MEMBER("event", _this);
+		};
 
 		/*
 		Patrol around a position
@@ -60,14 +59,16 @@
 			while { true } do {
 				switch (MEMBER("event", nil)) do {
 					case "alert": {
-						systemChat "engaging..";
+						systemChat "Engaging ...";
 						MEMBER("getNextTarget", nil);
 						MEMBER("engageTarget", nil);
 					};
 					case "city": {
+						systemChat "Walking in city ...";
 						MEMBER("walkInBuildings", nil);
 					};
 					default{
+						systemChat "Walking ...";
 						MEMBER("walk", _areasize);
 					};
 				};
@@ -202,8 +203,8 @@
 			private _side = side (leader MEMBER("group", nil));
 			private _position = position leader(MEMBER("group", nil));
 			private _array = [];
-			private _list = _position nearEntities [["Man"], 800];
-			private _list2 = _position nearEntities [["Tank", "Air"], 800];
+			private _list = _position nearEntities [["Man"], 500];
+			private _list2 = _position nearEntities [["Tank", "Air"], 500];
 			sleep 1;
 
 			{
@@ -303,14 +304,12 @@
 		PUBLIC FUNCTION("array", "moveTo") {
 			DEBUG(#, "OO_PATROL::moveTo")
 			private _group = MEMBER("group", nil);
-			private _leader = leader _group;
-			private _maxtime = 60;
 			private _counter = 0;
 
 			private _position = _this;
 			private _wp = _group addWaypoint [_position, 0];
 			_wp setWaypointPosition [_position, 0];
-			_wp setWaypointType "SAD";
+			_wp setWaypointType "DESTROY";
 			_wp setWaypointVisible true;
 			_wp setWaypointSpeed "FULL";
 			_group setCurrentWaypoint _wp;
@@ -324,17 +323,9 @@
 
 			sleep 30;
 
+			MEMBER("event", "");
 			deleteMarker _marker;
 			deletewaypoint _wp;
-		};
-
-
-
-		PUBLIC FUNCTION("", "isCompleteGroup") {
-			DEBUG(#, "OO_PATROL::isCompleteGroup")
-			private _count = MEMBER("sizegroup", nil);
-			private _count2 = count units (MEMBER("group", nil));
-			if( _count isEqualTo _count2) then { true; } else { false;};
 		};
 
 		PUBLIC FUNCTION("", "dropSmoke") {
@@ -472,14 +463,11 @@
 
 		PUBLIC FUNCTION("","deconstructor") { 
 			DEBUG(#, "OO_PATROL::deconstructor")
-			DELETE_VARIABLE("alert");
-			DELETE_VARIABLE("around");
 			DELETE_VARIABLE("areasize");
-			DELETE_VARIABLE("sizegroup");
 			DELETE_VARIABLE("group");
 			DELETE_VARIABLE("target");
 			DELETE_VARIABLE("targets");
 			DELETE_VARIABLE("buildings");
-			DELETE_VARIABLE("city");
+			DELETE_VARIABLE("this");
 		};
 	ENDCLASS;
