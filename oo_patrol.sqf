@@ -57,6 +57,7 @@
 			SPAWN_MEMBER("analysis", nil);
 
 			while { true } do {
+				systemChat format ["Something happen %1...", time];
 				switch (MEMBER("event", nil)) do {
 					case "alert": {
 						systemChat "Engaging ...";
@@ -104,7 +105,8 @@
 					if (count(_x buildingPos -1) > 0) then {
 						_positions = _positions + (_x buildingPos -1);
 					};
-				}foreach _buildings;
+					true;
+				} count _buildings;
 			};
 			_positions;
 		};
@@ -113,7 +115,6 @@
 		PUBLIC FUNCTION("array", "getBuildings") {
 			DEBUG(#, "OO_PATROL::getBuildings")
 			private _positions = MEMBER("getPositionsBuilding", _this);
-
 			MEMBER("buildings", _positions);
 			if(count _positions > 10) then {
 				MEMBER("event", "city");
@@ -173,8 +174,9 @@
 				_array = [_leader, _x];
 				_index = floor (MEMBER("estimateTarget", _array));
 				_candidats pushBack [_index, _x];
-				sleep 0.0001;
-			}foreach MEMBER("targets", nil);
+				sleep 0.01;
+				true;
+			} count MEMBER("targets", nil);
 
 			if(!isnil "_target") then {
 				if(alive _target) then {
@@ -190,8 +192,8 @@
 					_target = _x select 1;
 					_min = _x select 0;
 				};
-				sleep 0.0001;
-			}foreach _candidats;
+				sleep 0.01;
+			} count _candidats;
 
 			if(_oldtarget != _target) then {
 				MEMBER("target", _target);
@@ -209,14 +211,16 @@
 
 			{
 				if(!(side _x isEqualTo _side) and !(side _x isEqualTo civilian)) then { _array pushBack _x;};
-				sleep 0.001;
-			}foreach _list;
+				sleep 0.01;
+				true;
+			} count _list;
 
 			{
 				private _driver = driver _x;
 				if(!(side _driver isEqualTo _side) and !(side _driver isEqualTo civilian)) then { _array = _array + (crew _x);};
-				sleep 0.001;
-			}foreach _list2;
+				sleep 0.01;
+				true;
+			} count _list2;
 			MEMBER("targets", _array);
 		};
 
@@ -231,8 +235,9 @@
 					_array = [_x, _target];
 					if(MEMBER("estimateTarget", _array) < 2) then {_see = true;};
 				};
-				sleep 0.0001;
-			} foreach units MEMBER("group", nil);
+				sleep 0.01;
+				true;
+			} count units MEMBER("group", nil);
 			_see;
 		};		
 
@@ -248,8 +253,9 @@
 				_x dotarget _target;
 				_x dofire _target;
 				_x setUnitPos "Middle";
-				sleep 0.001;
-			}foreach units MEMBER("group", nil);
+				sleep 0.01;
+				true;
+			} count units MEMBER("group", nil);
 		};
 
 		// moveInto Buildings
@@ -262,13 +268,14 @@
 			while { format ["%1", _building buildingPos _index] != "[0,0,0]" } do {
 				_positions pushBack (_building buildingPos _index);
 				_index = _index + 1;
-				sleep 0.0001;
+				sleep 0.01;
 			};
 
 			{
 				_x domove (selectRandom _positions);
-				sleep 0.0001;
-			}foreach units MEMBER("group", nil);
+				sleep 0.01;
+				true;
+			} count units MEMBER("group", nil);
 			sleep 30;
 		};
 
@@ -352,8 +359,9 @@
 			DEBUG(#, "OO_PATROL::scanTargets")
 			{
 				if((leader MEMBER("group", nil)) knowsAbout _x > 0.40) then { MEMBER("event", "alert"); };
-				sleep 0.001;
-			}foreach MEMBER("targets", nil);
+				sleep 0.01;
+				true;
+			} count MEMBER("targets", nil);
 		};
 
 		// soldiers walk around the sector
@@ -362,7 +370,7 @@
 			private _group = MEMBER("group", nil);
 			private _leader = leader _group;
 			private _areasize = _this;
-			private _maxtime = 60;
+			private _maxtime = 30;
 			private _wp ="";
 			private _counter = 0;
 
@@ -375,7 +383,7 @@
 			
 			while { (position _leader) distance _position < (_areasize/2.5) } do {
 				_position = [_position, _areasize, random 359] call BIS_fnc_relPos;
-				sleep 0.0001;
+				sleep 0.01;
 			};
 
 			_wp = _group addWaypoint [_position, 10];
@@ -396,7 +404,7 @@
 			_counter = 0;
 			while { _counter < _maxtime } do {
 				_leader = leader _group;
-				if!(MEMBER("event", nil) isEqualTo "alert") then { _counter = _maxtime;};
+				if(MEMBER("event", nil) isEqualTo "alert") then { _counter = _maxtime;};
 				if(_leader distance _position < 5) then { 	_counter = _maxtime; };
 				_counter = _counter + 1;
 				sleep 1;
@@ -411,14 +419,16 @@
 			private _group = MEMBER("group", nil);
 			private _leader = leader _group;
 			private _areasize = MEMBER("areasize", nil);
-			private _maxtime = 300;
+			private _maxtime = 30;
 			private _counter = 0;
 
 			MEMBER("setBuildingMode", nil);
+
 			{
 				_x domove (selectRandom MEMBER("buildings",nil));
-				sleep 0.0001;
-			}foreach units MEMBER("group", nil);
+				sleep 0.01;
+				true;
+			} count units MEMBER("group", nil);
 
 			while { _counter < _maxtime } do {
 				_leader = leader _group;
@@ -431,8 +441,8 @@
 
 		PUBLIC FUNCTION("", "setBuildingMode") {
 			DEBUG(#, "OO_PATROL::setBuildingMode")
-			MEMBER("group", nil) setBehaviour "SAFE";
-			MEMBER("group", nil) setCombatMode "WHITE";
+			MEMBER("group", nil) setBehaviour "COMBAT";
+			MEMBER("group", nil) setCombatMode "RED";
 			MEMBER("group", nil) setSpeedMode "FULL";
 			MEMBER("group", nil) allowFleeing 0.1;
 		};
@@ -443,7 +453,7 @@
 			MEMBER("group", nil) setCombatMode "RED";
 			MEMBER("group", nil) setSpeedMode "FULL";
 			MEMBER("group", nil) allowFleeing 0.1;
-		};		
+		};
 
 		PUBLIC FUNCTION("", "setSafeMode") {
 			DEBUG(#, "OO_PATROL::setSafeMode")
