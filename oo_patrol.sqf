@@ -365,11 +365,12 @@
 		};
 
 		// soldiers walk around the sector
-		PUBLIC FUNCTION("scalar", "guard") {
+		PUBLIC FUNCTION("array", "guard") {
 			DEBUG(#, "OO_PATROL::walk")
 			private _group = MEMBER("group", nil);
 			private _leader = leader _group;
 			private _position = _this select 0;
+			if(count _position > 2) then {_position deleteAt 2;};
 			private _areasize = _this select 1;
 			private _maxtime = 30;
 			private _wp ="";
