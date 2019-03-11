@@ -70,7 +70,7 @@
 					};
 					default{
 						systemChat "Walking ...";
-						MEMBER("walk", _areasize);
+						MEMBER("guard", _array);
 					};
 				};
 			};
@@ -365,11 +365,12 @@
 		};
 
 		// soldiers walk around the sector
-		PUBLIC FUNCTION("scalar", "walk") {
+		PUBLIC FUNCTION("scalar", "guard") {
 			DEBUG(#, "OO_PATROL::walk")
 			private _group = MEMBER("group", nil);
 			private _leader = leader _group;
-			private _areasize = _this;
+			private _position = _this select 0;
+			private _areasize = _this select 1;
 			private _maxtime = 30;
 			private _wp ="";
 			private _counter = 0;
@@ -379,8 +380,6 @@
 			private _formationtype = selectRandom ["COLUMN", "STAG COLUMN","WEDGE","ECH LEFT","ECH RIGHT","VEE","LINE","FILE","DIAMOND"];
 			_group setFormation _formationtype;
 
-			private _position = position _leader;
-			
 			while { (position _leader) distance _position < (_areasize/2.5) } do {
 				_position = [_position, _areasize, random 359] call BIS_fnc_relPos;
 				sleep 0.01;
