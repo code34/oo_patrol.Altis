@@ -51,6 +51,8 @@
 			DEBUG(#, "OO_PATROL::patrol")
 			private _position = _this select 0;
 			private _areasize = _this select 1;
+			if(count _position > 2) then {_position deleteAt 2;};
+			if(count _areasize > 1) then { _areasize = ((_areasize select 0) + (_areasize select 1)) / 2;};
 
 			private _array = [_position, _areasize];
 			MEMBER("getBuildings", _array);
@@ -370,7 +372,6 @@
 			private _group = MEMBER("group", nil);
 			private _leader = leader _group;
 			private _position = _this select 0;
-			if(count _position > 2) then {_position deleteAt 2;};
 			private _areasize = _this select 1;
 			private _maxtime = 30;
 			private _wp ="";
